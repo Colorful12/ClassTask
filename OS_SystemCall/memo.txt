@@ -1,0 +1,6 @@
+gcc TCPEchoServer.c DieWithError.c HandleTCPClient.c CreateTCPServerSocket.c AcceptTCPConnection.c  -o TCPEchoServer
+
+gcc TCPEchoClient.c DieWithError.c -o TCPEchoClient
+
+./TCPEchoClient 192.168.11.15 "hello" 5000
+./TCPEchoClient 127.0.0.1 "Hi!" 5000
