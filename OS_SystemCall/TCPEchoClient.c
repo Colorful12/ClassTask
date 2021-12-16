@@ -66,16 +66,17 @@ int main(int argc, char *argv[])
     taskLen = strlen(task);
     timebufLen = strlen(timebuf);
 
-    int aaa;
-    char aaaBuffer[RCVBUFSIZE];
+    int check;
+    char checkBuffer[RCVBUFSIZE];
     /* 文字列たちをサーバーに送信 */
     /* この辺もう少しきれいにする */
     
     if (send(sock, task, taskLen, 0) != taskLen)
         DieWithError("send() sent a different number of bytes than expected");
-    if ((aaa = recv(sock, aaaBuffer, RCVBUFSIZE - 1, 0)) <= 0){
+    if (( recv(sock, checkBuffer, RCVBUFSIZE - 1, 0)) <= 0){
         DieWithError("send() sent a different number of bytes than expected");
-    }else{printf("catch\n");}    
+    }else if (strcmp(checkBuffer, "!")!=0)
+        DieWithError("!が返ってこなかったよ");
     if (send(sock, timebuf, timebufLen, 0) != timebufLen)
         DieWithError("send() sent a different number of bytes than expected");    
 
