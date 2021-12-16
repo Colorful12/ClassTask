@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     double time;
     char timebuf[1000];
 
-    printf("何の時間を測定しますか？>> ");
+    printf("何までの時間を測定しますか？>> ");
     scanf("%s",task);
     printf("測る時間は何分ですか？>> ");
     scanf("%lf",&time);
@@ -74,9 +74,9 @@ int main(int argc, char *argv[])
     if (send(sock, task, taskLen, 0) != taskLen)
         DieWithError("send() sent a different number of bytes than expected");
     if (( recv(sock, checkBuffer, RCVBUFSIZE - 1, 0)) <= 0){
-        DieWithError("send() sent a different number of bytes than expected");
+        DieWithError("recv() failed or connection closed prematurely");
     }else if (strcmp(checkBuffer, "!")!=0)
-        DieWithError("!が返ってこなかったよ");
+        DieWithError("client chatched a different word from server. not \"!\"");
     if (send(sock, timebuf, timebufLen, 0) != timebufLen)
         DieWithError("send() sent a different number of bytes than expected");    
 
