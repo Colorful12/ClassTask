@@ -7,7 +7,7 @@
 
 #define RCVBUFSIZE 32   /* Size of receive buffer */
 
-void DieWithError(char *errorMessage);  /* Error handling function */
+void DieWithError(char *errorMessage);
 void test1();
 
 int main(int argc, char *argv[])
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv() 
                                         and total bytes read */
 
-    if ((argc < 3) || (argc > 4))    /* Test for correct number of arguments */
+    if ((argc < 2) || (argc > 3))    /* Test for correct number of arguments */
     {
        fprintf(stderr, "Usage: %s <Server IP> <Echo Word> [<Echo Port>]\n",
                argv[0]);
@@ -35,17 +35,16 @@ int main(int argc, char *argv[])
     double time;
     char timebuf[1000];
 
-    printf("これから行う作業を入力してください。>> ");
+    printf("何の時間を測定しますか？>> ");
     scanf("%s",task);
     printf("測る時間は何分ですか？>> ");
     scanf("%lf",&time);
     snprintf(timebuf, 1000, "%lf", time); /* double型をchar型配列に変換*/
 
     servIP = argv[1];             /* server IP address  */
-    echoString = argv[2];         /* string to echo */
 
-    if (argc == 4)
-        echoServPort = atoi(argv[3]); 
+    if (argc == 3)
+        echoServPort = atoi(argv[2]); 
     else
         echoServPort = 7;  /*指示がなければ7番ポート */
 
@@ -59,10 +58,10 @@ int main(int argc, char *argv[])
     echoServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
     echoServAddr.sin_port        = htons(echoServPort); /* Server port */
 
-    /* Establish the connection to the echo server */
+    /* サーバーとの接続の確立 */
     if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         DieWithError("connect() failed");
-
+    echoString = "Hi";
     echoStringLen = strlen(echoString);          /* Determine input length */
     taskLen = strlen(task);
     timebufLen = strlen(timebuf);
@@ -71,11 +70,7 @@ int main(int argc, char *argv[])
     char aaaBuffer[RCVBUFSIZE];
     /* 文字列たちをサーバーに送信 */
     /* この辺もう少しきれいにする */
-    if (send(sock, echoString, echoStringLen, 0) != echoStringLen)
-        DieWithError("send() sent a different number of bytes than expected");
-    if ((aaa = recv(sock, aaaBuffer, RCVBUFSIZE - 1, 0)) <= 0){
-        DieWithError("send() sent a different number of bytes than expected");
-    }else{printf("catch\n");}
+    
     if (send(sock, task, taskLen, 0) != taskLen)
         DieWithError("send() sent a different number of bytes than expected");
     if ((aaa = recv(sock, aaaBuffer, RCVBUFSIZE - 1, 0)) <= 0){
@@ -96,7 +91,8 @@ int main(int argc, char *argv[])
         totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
         echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
         printf("%s", echoBuffer);      /* Print the echo buffer */
-        test1();
+
+        test1(echoBuffer);
     }
 
     printf("\n");    /* Print a final linefeed */

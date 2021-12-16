@@ -1,6 +1,6 @@
 #include "TCPEchoServer.h"  /* TCP echo server includes */
 #include <sys/wait.h>       /* for waitpid() */
-#include <unistd.h> /*for sleep()*/
+
 
 int main(int argc, char *argv[])
 {
@@ -29,7 +29,6 @@ int main(int argc, char *argv[])
         else if (processID == 0)  /* If this is the child process */
         {
             close(servSock);   /* Child closes parent socket */
-            sleep(10); /* 追加 */
             HandleTCPClient(clntSock);
 
             exit(0);           /* Child process terminates */
