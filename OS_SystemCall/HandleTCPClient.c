@@ -1,19 +1,35 @@
 #include <stdio.h>      /* for printf() and fprintf() */
 #include <sys/socket.h> /* for recv() and send() */
 #include <unistd.h>     /* for close() */
-
-#define RCVBUFSIZE 32   /* Size of receive buffer */
+#include <string.h>    /* for strlen() */
+#define RCVBUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
 void HandleTCPClient(int clntSocket)
 {
     char echoBuffer[RCVBUFSIZE];        /* Buffer for echo string */
-    int recvMsgSize;                    /* Size of received message */
+    char taskBuffer[RCVBUFSIZE];
+    char timeBuffer[RCVBUFSIZE];
+    int recvMsgSize, taskSize, timeSize;                    /* Size of received message */
 
+    char bikkuri[] = "!";
     /* Receive message from client */
     if ((recvMsgSize = recv(clntSocket, echoBuffer, RCVBUFSIZE, 0)) < 0)
         DieWithError("recv() failed");
+    printf("%s\n",echoBuffer);
+    if (send(clntSocket, bikkuri, strlen(bikkuri), 0) != strlen(bikkuri))
+            DieWithError("send() failed");
+
+    if ((taskSize = recv(clntSocket, taskBuffer, RCVBUFSIZE, 0)) < 0)
+        DieWithError("recv() failed");
+    printf("%s\n", taskBuffer);
+    if (send(clntSocket, bikkuri, strlen(bikkuri), 0) != strlen(bikkuri))
+            DieWithError("send() failed");
+            
+    if ((timeSize = recv(clntSocket, timeBuffer, RCVBUFSIZE, 0)) < 0)
+        DieWithError("recv() failed");
+    printf("%s\n",timeBuffer);
 
     /* Send received string and receive again until end of transmission */
     while (recvMsgSize > 0)      /* zero indicates end of transmission */
