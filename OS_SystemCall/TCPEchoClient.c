@@ -5,7 +5,7 @@
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
 
-#define RCVBUFSIZE 32   /* Size of receive buffer */
+#define RCVBUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);
 void test1();
@@ -16,13 +16,13 @@ int main(int argc, char *argv[])
     struct sockaddr_in echoServAddr; /* Echo server address */
     unsigned short echoServPort;     /* Echo server port */
     char *servIP;                    /* Server IP address (dotted quad) */
-    char *echoString;                /* String to send to echo server */
     char echoBuffer[RCVBUFSIZE];     /* Buffer for echo string */
-    unsigned int echoStringLen;      /* Length of string to echo */
+    char task[100];
+    double time;
+    char timebuf[100];
     unsigned int taskLen;
     unsigned int timebufLen;
-    int bytesRcvd, totalBytesRcvd;   /* Bytes read in single recv() 
-                                        and total bytes read */
+    int bytesRcvd;   /*最後にサーバーから受け取る文字列の長さ*/
 
     if ((argc < 2) || (argc > 3))    /* Test for correct number of arguments */
     {
@@ -31,17 +31,15 @@ int main(int argc, char *argv[])
        exit(1);
     }
 
-    char task[1000];
-    double time;
-    char timebuf[1000];
+
 
     printf("何までの時間を測定しますか？>> ");
     scanf("%s",task);
     printf("測る時間は何分ですか？>> ");
     scanf("%lf",&time);
-    snprintf(timebuf, 1000, "%lf", time); /* double型をchar型配列に変換*/
+    snprintf(timebuf, 100, "%lf", time); /* double型をchar型配列に変換*/
 
-    servIP = argv[1];             /* server IP address  */
+    servIP = argv[1]; /* server IP address  */
 
     if (argc == 3)
         echoServPort = atoi(argv[2]); 
@@ -52,8 +50,8 @@ int main(int argc, char *argv[])
     if ((sock = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
         DieWithError("socket() failed");
 
-    /* Construct the server address structure */
-    memset(&echoServAddr, 0, sizeof(echoServAddr));     /* Zero out structure */
+    /* サーバーのアドレス構造体の作成 */
+    memset(&echoServAddr, 0, sizeof(echoServAddr));     /* 0埋め */
     echoServAddr.sin_family      = AF_INET;             /* Internet address family */
     echoServAddr.sin_addr.s_addr = inet_addr(servIP);   /* Server IP address */
     echoServAddr.sin_port        = htons(echoServPort); /* Server port */
@@ -61,8 +59,7 @@ int main(int argc, char *argv[])
     /* サーバーとの接続の確立 */
     if (connect(sock, (struct sockaddr *) &echoServAddr, sizeof(echoServAddr)) < 0)
         DieWithError("connect() failed");
-    echoString = "Hi";
-    echoStringLen = strlen(echoString);          /* Determine input length */
+ 
     taskLen = strlen(task);
     timebufLen = strlen(timebuf);
 
@@ -80,22 +77,11 @@ int main(int argc, char *argv[])
     if (send(sock, timebuf, timebufLen, 0) != timebufLen)
         DieWithError("send() sent a different number of bytes than expected");    
 
-    /* Receive the same string back from the server */
-    totalBytesRcvd = 0;
-    printf("Received: ");                /* Setup to print the echoed string */
-    while (totalBytesRcvd < echoStringLen)
-    {
-        /* Receive up to the buffer size (minus 1 to leave space for
-           a null terminator) bytes from the sender */
-        if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
-            DieWithError("recv() failed or connection closed prematurely");
-        totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
-        echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
-        printf("%s", echoBuffer);      /* Print the echo buffer */
 
-        test1(echoBuffer);
-    }
-
+    if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
+        DieWithError("recv() failed or connection closed prematurely");
+    echoBuffer[bytesRcvd] = '\0';  
+    test1(echoBuffer);
     printf("\n");    /* Print a final linefeed */
 
     close(sock);

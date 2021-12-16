@@ -4,7 +4,7 @@
 #include <string.h>    /* for strlen() */
 #include <unistd.h> /*for sleep()*/
 #include <stdlib.h>
-#define RCVBUFSIZE 100   /* Size of receive buffer */
+#define RCVBUFSIZE 1000   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
 
