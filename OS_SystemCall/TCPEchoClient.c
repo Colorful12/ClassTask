@@ -8,6 +8,7 @@
 #define RCVBUFSIZE 32   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);  /* Error handling function */
+void test1();
 
 int main(int argc, char *argv[])
 {
@@ -68,6 +69,7 @@ int main(int argc, char *argv[])
         totalBytesRcvd += bytesRcvd;   /* Keep tally of total bytes */
         echoBuffer[bytesRcvd] = '\0';  /* Terminate the string! */
         printf("%s", echoBuffer);      /* Print the echo buffer */
+        test1();
     }
 
     printf("\n");    /* Print a final linefeed */

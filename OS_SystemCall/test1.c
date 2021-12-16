@@ -2,7 +2,7 @@
 #include <stdio.h> /* for snpringf()*/
 
 
-int main(void){
+void test1(void){
     int BUFSIZE = 1000;
     char buf[BUFSIZE];
     char first[] = "終了通知";
@@ -10,6 +10,4 @@ int main(void){
     snprintf(buf, BUFSIZE, "bash test.sh %s %s", first, second);
 
     system(buf);
-
-    return 0;
 }
