@@ -5,7 +5,7 @@
 #include <string.h>     /* for memset() */
 #include <unistd.h>     /* for close() */
 
-#define RCVBUFSIZE 100   /* Size of receive buffer */
+#define BUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);
 void test1();
@@ -16,10 +16,10 @@ int main(int argc, char *argv[])
     struct sockaddr_in echoServAddr; /* Echo server address */
     unsigned short echoServPort;     /* Echo server port */
     char *servIP;                    /* Server IP address (dotted quad) */
-    char echoBuffer[RCVBUFSIZE];     /* Buffer for echo string */
-    char task[100];
+    char echoBuffer[BUFSIZE];     /* Buffer for echo string */
+    char task[BUFSIZE];
     double time;
-    char timebuf[100];
+    char timebuf[BUFSIZE];
     unsigned int taskLen;
     unsigned int timebufLen;
     int bytesRcvd;   /*最後にサーバーから受け取る文字列の長さ*/
@@ -31,13 +31,11 @@ int main(int argc, char *argv[])
        exit(1);
     }
 
-
-
     printf("何までの時間を測定しますか？>> ");
     scanf("%s",task);
     printf("測る時間は何分ですか？>> ");
     scanf("%lf",&time);
-    snprintf(timebuf, 100, "%lf", time); /* double型をchar型配列に変換*/
+    snprintf(timebuf, BUFSIZE, "%lf", time); /* double型をchar型配列に変換*/
 
     servIP = argv[1]; /* server IP address  */
 
@@ -64,13 +62,13 @@ int main(int argc, char *argv[])
     timebufLen = strlen(timebuf);
 
     int check;
-    char checkBuffer[RCVBUFSIZE];
+    char checkBuffer[BUFSIZE];
     /* 文字列たちをサーバーに送信 */
     /* この辺もう少しきれいにする */
     
     if (send(sock, task, taskLen, 0) != taskLen)
         DieWithError("send() sent a different number of bytes than expected");
-    if (( recv(sock, checkBuffer, RCVBUFSIZE - 1, 0)) <= 0){
+    if (( recv(sock, checkBuffer, BUFSIZE - 1, 0)) <= 0){
         DieWithError("recv() failed or connection closed prematurely");
     }else if (strcmp(checkBuffer, "!")!=0)
         DieWithError("client chatched a different word from server. not \"!\"");
@@ -78,7 +76,7 @@ int main(int argc, char *argv[])
         DieWithError("send() sent a different number of bytes than expected");    
 
 
-    if ((bytesRcvd = recv(sock, echoBuffer, RCVBUFSIZE - 1, 0)) <= 0)
+    if ((bytesRcvd = recv(sock, echoBuffer, BUFSIZE - 1, 0)) <= 0)
         DieWithError("recv() failed or connection closed prematurely");
     echoBuffer[bytesRcvd] = '\0';  
     test1(echoBuffer);
