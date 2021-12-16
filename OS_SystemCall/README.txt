@@ -1,3 +1,7 @@
+ソケットAPIを用いたプログラムを作る課題
+(ソケットAPIを用いていれば他は自由)
+
+
 **サーバー側のコンパイル
 gcc TCPEchoServer.c DieWithError.c HandleTCPClient.c CreateTCPServerSocket.c AcceptTCPConnection.c  -o TCPEchoServer
 
