@@ -3,7 +3,7 @@
 
 
 **サーバー側のコンパイル
-gcc TCPEchoServer.c DieWithError.c HandleTCPClient.c CreateTCPServerSocket.c AcceptTCPConnection.c  -o TCPEchoServer
+gcc TCPEchoServer.c DieWithError.c HandleTCPClient.c CreateTCPServerSocket.c AcceptTCPConnection.c time.c -o TCPEchoServer
 
 **クライアント側のコンパイル
 gcc TCPEchoClient.c DieWithError.c popup.c -o TCPEchoClient

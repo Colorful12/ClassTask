@@ -7,6 +7,7 @@
 #define RCVBUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage); 
+void Time(double time);
 
 void HandleTCPClient(int clntSocket)
 {
@@ -24,8 +25,9 @@ void HandleTCPClient(int clntSocket)
         DieWithError("recv() failed");
 
     printf("%sまでの時間を測定します。\n", taskBuffer);
-    
+
     time = strtod(timeBuffer, NULL)*60;
+    Time(time);  
     sleep(time); /* 指定された時間スリープする */
 
     if (send(clntSocket, taskBuffer, taskSize, 0) != taskSize)
