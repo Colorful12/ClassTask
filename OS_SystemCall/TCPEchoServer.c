@@ -10,7 +10,7 @@ int main(int argc, char *argv[])
     pid_t processID;                 /* Process ID from fork() */
     unsigned int childProcCount = 0; /* Number of child processes */ 
 
-    if (argc != 2)     /* Test for correct number of arguments */
+    if (argc != 2)
     {
         fprintf(stderr, "Usage:  %s <Server Port>\n", argv[0]);
         exit(1);
@@ -20,34 +20,32 @@ int main(int argc, char *argv[])
 
     servSock = CreateTCPServerSocket(echoServPort);
 
-    for (;;) /* Run forever */
+    for (;;) 
     {
         clntSock = AcceptTCPConnection(servSock);
-        /* Fork child process and report any errors */
+        
         if ((processID = fork()) < 0)
             DieWithError("fork() failed");
-        else if (processID == 0)  /* If this is the child process */
+        else if (processID == 0)  /* 子プロセス */
         {
-            close(servSock);   /* Child closes parent socket */
+            close(servSock);  
             HandleTCPClient(clntSock);
 
-            exit(0);           /* Child process terminates */
+            exit(0);           
         }
 
-        printf("with child process: %d\n", (int) processID);
-        close(clntSock);       /* Parent closes child socket descriptor */
-        childProcCount++;      /* Increment number of outstanding child processes */
+        childProcCount++; 
 
-        while (childProcCount) /* Clean up all zombies */
+        while (childProcCount) /* ゾンビのお掃除 */
         {
-            processID = waitpid((pid_t) -1, NULL, WNOHANG);  /* Non-blocking wait */
-            if (processID < 0)  /* waitpid() error? */
+            processID = waitpid((pid_t) -1, NULL, WNOHANG);  /* ノンブロッキング */
+            if (processID < 0)  
                 DieWithError("waitpid() failed");
-            else if (processID == 0)  /* No zombie to wait on */
+            else if (processID == 0) 
                 break;
             else
-                childProcCount--;  /* Cleaned up after a child */
+                childProcCount--; 
         }
     }
-    /* NOT REACHED */
+    
 }

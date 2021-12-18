@@ -2,7 +2,7 @@
 #include <sys/socket.h> /* for accept() */
 #include <arpa/inet.h>  /* for sockaddr_in and inet_ntoa() */
 
-void DieWithError(char *errorMessage);  /* Error handling function */
+void DieWithError(char *errorMessage);
 
 int AcceptTCPConnection(int servSock)
 {
@@ -10,15 +10,14 @@ int AcceptTCPConnection(int servSock)
     struct sockaddr_in echoClntAddr; /* Client address */
     unsigned int clntLen;            /* Length of client address data structure */
 
-    /* Set the size of the in-out parameter */
-    clntLen = sizeof(echoClntAddr);
     
-    /* Wait for a client to connect */
+    clntLen = sizeof(echoClntAddr);
+
+    /* クライアントを待つ */
     if ((clntSock = accept(servSock, (struct sockaddr *) &echoClntAddr, 
            &clntLen)) < 0)
         DieWithError("accept() failed");
     
-    /* clntSock is connected to a client! */
     
     printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
 

@@ -22,7 +22,9 @@ void HandleTCPClient(int clntSocket)
             DieWithError("send() failed");
     if ((timeSize = recv(clntSocket, timeBuffer, RCVBUFSIZE, 0)) < 0)
         DieWithError("recv() failed");
-   
+
+    printf("%sまでの時間を測定します。\n", taskBuffer);
+    
     time = strtod(timeBuffer, NULL)*60;
     sleep(time); /* 指定された時間スリープする */
 
