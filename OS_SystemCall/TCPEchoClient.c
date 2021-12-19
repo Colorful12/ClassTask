@@ -8,7 +8,7 @@
 #define BUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);
-void test1();
+void Popup();
 
 int main(int argc, char *argv[])
 {
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     if ((bytesRcvd = recv(sock, echoBuffer, BUFSIZE - 1, 0)) <= 0)
         DieWithError("recv() failed or connection closed prematurely");
     echoBuffer[bytesRcvd] = '\0';  
-    test1(echoBuffer);
+    Popup(echoBuffer);
     printf("\n");    /* Print a final linefeed */
 
     close(sock);

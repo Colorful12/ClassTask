@@ -18,8 +18,8 @@ int AcceptTCPConnection(int servSock)
            &clntLen)) < 0)
         DieWithError("accept() failed");
     
-    
-    printf("Handling client %s\n", inet_ntoa(echoClntAddr.sin_addr));
+    /* サーバー側のshellに表示される文字列の区切れ目 + クライアントのIPアドレス */
+    printf("-------------------------------------------------------- %s\n", inet_ntoa(echoClntAddr.sin_addr));
 
     return clntSock;
 }

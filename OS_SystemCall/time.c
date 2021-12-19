@@ -5,7 +5,6 @@ void Time(double addtime){
     time_t timer;
     struct tm *s_tm;
 
-    printf("addtime : %lf\n",addtime);
     /*  現在時刻の取得＆tm構造体の取得 */
     time(&timer);
     s_tm = localtime(&timer);
