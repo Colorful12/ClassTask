@@ -8,7 +8,7 @@
 #define BUFSIZE 100   /* Size of receive buffer */
 
 void DieWithError(char *errorMessage);
-void test1();
+void popup();
 
 int main(int argc, char *argv[])
 {
@@ -63,8 +63,8 @@ int main(int argc, char *argv[])
 
     int check;
     char checkBuffer[BUFSIZE];
+    
     /* 文字列たちをサーバーに送信 */
-    /* この辺もう少しきれいにする */
     
     if (send(sock, task, taskLen, 0) != taskLen)
         DieWithError("send() sent a different number of bytes than expected");
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
     if ((bytesRcvd = recv(sock, echoBuffer, BUFSIZE - 1, 0)) <= 0)
         DieWithError("recv() failed or connection closed prematurely");
     echoBuffer[bytesRcvd] = '\0';  
-    test1(echoBuffer);
+    popup(echoBuffer);
     printf("\n");    /* Print a final linefeed */
 
     close(sock);
