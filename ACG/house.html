@@ -1,0 +1,76 @@
+<!-- 
+   This is the first home work of the class "Advanced Computer Graphics".
+   This hw is for canvas element beginner I think.
+   I'm a beginner of it. 
+ -->
+
+<html>
+<head>
+ <title>House Homework</title>
+ <meta name="author" content="Saki Kohata (1W192140)" />
+ <script>
+   let canvas;    // DOM object corresponding to the canvas
+   let graphics;  // 2D graphics context for drawing to the canvas
+   // Drawing function
+   
+   // function for drawing △
+   function triangle(x1, y1, x2, y2, x3, y3){
+      graphics.beginPath();
+      graphics.moveTo(x1, y1);
+      graphics.lineTo(x2, y2);
+      graphics.lineTo(x3, y3);
+      graphics.closePath();
+      graphics.stroke();
+   }
+
+   function bezier(x1, y1, x2, y2, cx1, cy1, cx2, cy2){
+      graphics.beginPath();
+      graphics.moveTo(x1, y1);
+      graphics.bezierCurveTo(cx1, cy1, cx2, cy2, x2, y2);
+      graphics.closePath();
+      graphics.stroke();
+   }
+   
+   function line(x1, y1, x2, y2){
+      graphics.beginPath();
+      graphics.moveTo(x1, y1);
+      graphics.lineTo(x2, y2);
+      graphics.closePath();
+      graphics.stroke();
+   }
+    
+   function draw() {
+     // graphics.fillText("Hello World", 50, 100 );
+      graphics.strokeRect(570, 60, 40, 200);
+      graphics.strokeRect(200, 280, 400, 260);
+      triangle(120, 280, 400, 280, 260, 140);
+      triangle(400, 280, 680, 280, 540, 140);
+      triangle(240, 280, 400, 60, 560, 280);
+      triangle(240, 280, 400, 60, 560, 280);
+      bezier(320, 540, 480, 540, 280, 260, 520, 260);
+      graphics.strokeRect(230, 340, 70, 70);
+      graphics.strokeRect(490, 340, 70, 70);
+      line(265, 340, 265, 410);
+      line(525, 340, 525, 410);
+      line(230, 340+(410-340)*0.34, 300, 340+(410-340)*0.34);
+      line(230, 340+(410-340)*0.68, 300, 340+(410-340)*0.68);
+      line(490, 340+(410-340)*0.34, 560, 340+(410-340)*0.34);
+      line(490, 340+(410-340)*0.68, 560, 340+(410-340)*0.68);
+      graphics.arc(340, 450, 10, 0, 2*Math.PI);
+      graphics.fillStyle="#ffffff"; //change the color this way
+      graphics.fill();
+   }
+
+   // Initialization function
+   function init() {
+      canvas   = document.getElementById("myCanvas");
+      graphics = canvas.getContext("2d");
+      draw(); // Draw onto the canvas
+   }
+   window.onload = init; // Runs when window is loaded
+ </script>
+</head>
+<body>
+ <canvas width="800" height="600" id="myCanvas" style="background-color: rgb(245, 245, 245);"></canvas>
+</body>
+</html>
