@@ -1,0 +1,132 @@
+<html>
+<head>
+ <title>3D WebGL HW</title>
+</head>
+<body>
+ <canvas id="glCanvas" style="width:400px; height:400px;" />
+ <!-- type="notjs" makes it not get identified as javascript. -->
+ <script id="vertex-shader" type="notjs">
+    # version 300 es
+    in vec4 pos;
+    out vec2 coord;
+    void main() {
+       coord = pos.xy*0.5+0.5;
+       gl_Position = pos;
+    }
+ </script>
+ <script id="fragment-shader" type="notjs">
+    # version 300 es
+    precision mediump float;
+    in vec2 coord;
+    out vec4 color_out;
+    void main() {
+       // vec2 newxy = vec2(mix(-1.0, 1.0, coord.x), mix(-1.0, 1.0, coord.y));
+       // float xyz = mix(0.0, 1.0, exp(length(newxy)*-1.0));
+       color_out = vec4(1.0, 0, 0, 1.0);
+    }
+ </script>
+ <script type="text/javascript">
+    function createProgram( gl, vertexSrc, fragmentSrc ) {
+        let vshd = gl.createShader( gl.VERTEX_SHADER );
+        gl.shaderSource( vshd, vertexSrc );
+        gl.compileShader( vshd );
+        if (!gl.getShaderParameter( vshd, gl.COMPILE_STATUS ))
+            throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( vshd ));
+        
+        let fshd = gl.createShader( gl.FRAGMENT_SHADER );
+        gl.shaderSource( fshd, fragmentSrc );
+        gl.compileShader( fshd );
+        if (!gl.getShaderParameter( fshd, gl.COMPILE_STATUS ))
+            throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( fshd ));
+        
+            let prog = gl.createProgram();
+        gl.attachShader( prog, vshd );
+        gl.attachShader( prog, fshd );
+        gl.linkProgram( prog );
+        if (!gl.getProgramParameter( prog, gl.LINK_STATUS ))
+            throw new Error( "Unable to link program: "+gl.getProgramInfoLog( prog ));
+        return prog;
+    }
+
+    function init() {
+    var c = document.getElementById("glCanvas");
+    var gl = c.getContext('webgl2');
+    if (!gl)
+        throw new Error("WebGL unsupported!");
+
+    // Clear screen
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    /*
+        2___3
+        |\  |
+        | \ |
+        |__\|
+        0   1
+    */
+    var vertexPosBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+    var vertices = [
+        1.0, 0.0, 0.0, 
+        0.0, 1.0, 0.0, 
+        0.0, 0.0, 1.0, 
+        -1.0, 0.0, 0.0,
+        0.0, -1.0, 0.0,
+        1.0, 0.0, 0.0,
+        0.0, 0.0, -1.0,
+        0.0, 1.0, 0.0,
+        -1.0, 0.0, 0.0,
+        0.0, -1.0, 0.0
+    ];
+    
+    // STATIC_DRAW : 値はほとんど変更されない, STREAM_DRAW : 値は1度もしくは数回しか使われない, DYNAMIC_DRAW: 値はたくさん修正・使用される
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+    vertexPosBuffer.itemSize = 8;
+    vertexPosBuffer.numItems = 10;
+
+    // // create fece colors 色は後で調節
+    // const faceColors = [
+    //   [1.0,  1.0,  1.0,  1.0],    // 前: white
+    //   [1.0,  0.0,  0.0,  1.0],    // 後: red
+    //   [0.0,  1.0,  0.0,  1.0],    // 上: green
+    //   [0.0,  0.0,  1.0,  1.0],    // 下: blue
+    //   [1.0,  1.0,  0.0,  1.0],    // 右: yellow
+    //   [1.0,  0.0,  1.0,  1.0],    // 左: purple
+    //   [1.0,  0.0,  1.0,  1.0],
+    //   [1.0,  0.0,  1.0,  1.0]
+    // ]; 
+    // var colors = [];
+    
+    // for (var j = 0; j < faceColors.length; ++j) {
+    //     const c = faceColors[j];
+
+    //     // 各面の4つの頂点に色情報を設定する
+    //     colors = colors.concat(c, c, c, c);
+    // }
+    
+    // const colorBuffer = gl.createBuffer();
+    // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+
+    
+
+    // Create our shader program
+    // vsとfsには, シェーダーのプログラム(l9～l28)が格納される
+    var vs = document.querySelector("#vertex-shader").text.trim();
+    var fs = document.querySelector("#fragment-shader").text.trim();
+    var program = createProgram(gl, vs, fs);
+    gl.useProgram(program);
+
+    // Get and set vertex attribute
+    program.vertexPosAttrib = gl.getAttribLocation(program, 'pos');
+    gl.enableVertexAttribArray(program.vertexPosAttrib);
+    gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0); // 第2引数がnumComponents 座標が何要素で記述されるか
+
+    // Draw triangles
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 8);
+    }
+    window.onload = init;
+ </script>
+</body>
+</html>
