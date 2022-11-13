@@ -3,26 +3,57 @@
  <title>3D WebGL HW</title>
 </head>
 <body>
- <canvas id="glCanvas" style="width:400px; height:400px;" />
+ <canvas id="glCanvas" style="width:800px; height:800px;" />
  <!-- type="notjs" makes it not get identified as javascript. -->
  <script id="vertex-shader" type="notjs">
     # version 300 es
+    precision mediump int;
     in vec4 pos;
-    out vec2 coord;
+    out float depth;
+    uniform int u_id;
+    uniform float u_time;
+
+    mat4 translate(vec3 t) {
+        return mat4( 1.0, 0.0, 0.0, 0,
+                      0.0, 1.0, 0.0, 0,
+                      0.0, 0.0, 1.0, 0,
+                      t.xyz, 1.0 );
+    }
+
+    mat4 projection(float l, float r, float b, float t, float n, float f) {
+        mat4 m = mat4(
+            2.0 / (r - l), 0.0, 0.0, -(r + l) / (r - l),
+            0.0, 2.0 / (t - b), 0.0, -(t + b) / (t - b),
+            0.0, 0.0, 2.0 / (f - n), -(f + n) / (f - n),
+            0.0, 0.0, 0.0, 1.0
+        );
+        return m;
+    }
+
     void main() {
-       coord = pos.xy*0.5+0.5;
-       gl_Position = pos;
+        vec4 new_pos;
+        mat4  c =  mat4(cos(1.5*u_time), 0, sin(1.5*u_time), 0,
+                        0, 1.0,  0, 0,
+                        -1.0*sin(1.5*u_time), 0, cos(1.5*u_time), 0,
+                        0, 0, 0, 1.0);
+        if(u_id==0){
+            new_pos = translate(vec3(0.0, 0.2, -1.0)) * c * pos;
+        }else{
+            new_pos = translate(vec3(0.0, -1.0, -1.0)) * pos;
+        }
+        gl_Position = projection(-1.0, 1.0, -1.0, 1.0, -0.01, -10.0) * new_pos;
+        depth = gl_Position.z;
     }
  </script>
  <script id="fragment-shader" type="notjs">
     # version 300 es
     precision mediump float;
-    in vec2 coord;
+    in float depth;
     out vec4 color_out;
+    uniform int u_id;
     void main() {
-       // vec2 newxy = vec2(mix(-1.0, 1.0, coord.x), mix(-1.0, 1.0, coord.y));
-       // float xyz = mix(0.0, 1.0, exp(length(newxy)*-1.0));
-       color_out = vec4(1.0, 0, 0, 1.0);
+       if(u_id==0) color_out = vec4(0, 0, 1.0 - depth * 3.0, 1.0);
+       else color_out = vec4(vec3(1.0 - depth), 1.0);
     }
  </script>
  <script type="text/javascript">
@@ -39,7 +70,7 @@
         if (!gl.getShaderParameter( fshd, gl.COMPILE_STATUS ))
             throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( fshd ));
         
-            let prog = gl.createProgram();
+        let prog = gl.createProgram();
         gl.attachShader( prog, vshd );
         gl.attachShader( prog, fshd );
         gl.linkProgram( prog );
@@ -48,85 +79,78 @@
         return prog;
     }
 
-    function init() {
     var c = document.getElementById("glCanvas");
     var gl = c.getContext('webgl2');
     if (!gl)
         throw new Error("WebGL unsupported!");
 
-    // Clear screen
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-
-    /*
-        2___3
-        |\  |
-        | \ |
-        |__\|
-        0   1
-    */
-    var vertexPosBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
-    var vertices = [
-        1.0, 0.0, 0.0, 
-        0.0, 1.0, 0.0, 
-        0.0, 0.0, 1.0, 
-        -1.0, 0.0, 0.0,
-        0.0, -1.0, 0.0,
-        1.0, 0.0, 0.0,
-        0.0, 0.0, -1.0,
-        0.0, 1.0, 0.0,
-        -1.0, 0.0, 0.0,
-        0.0, -1.0, 0.0
-    ];
-    
-    // STATIC_DRAW : 値はほとんど変更されない, STREAM_DRAW : 値は1度もしくは数回しか使われない, DYNAMIC_DRAW: 値はたくさん修正・使用される
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-    vertexPosBuffer.itemSize = 8;
-    vertexPosBuffer.numItems = 10;
-
-    // // create fece colors 色は後で調節
-    // const faceColors = [
-    //   [1.0,  1.0,  1.0,  1.0],    // 前: white
-    //   [1.0,  0.0,  0.0,  1.0],    // 後: red
-    //   [0.0,  1.0,  0.0,  1.0],    // 上: green
-    //   [0.0,  0.0,  1.0,  1.0],    // 下: blue
-    //   [1.0,  1.0,  0.0,  1.0],    // 右: yellow
-    //   [1.0,  0.0,  1.0,  1.0],    // 左: purple
-    //   [1.0,  0.0,  1.0,  1.0],
-    //   [1.0,  0.0,  1.0,  1.0]
-    // ]; 
-    // var colors = [];
-    
-    // for (var j = 0; j < faceColors.length; ++j) {
-    //     const c = faceColors[j];
-
-    //     // 各面の4つの頂点に色情報を設定する
-    //     colors = colors.concat(c, c, c, c);
-    // }
-    
-    // const colorBuffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-
-    
-
     // Create our shader program
-    // vsとfsには, シェーダーのプログラム(l9～l28)が格納される
     var vs = document.querySelector("#vertex-shader").text.trim();
     var fs = document.querySelector("#fragment-shader").text.trim();
     var program = createProgram(gl, vs, fs);
     gl.useProgram(program);
 
+    // 多少冗長...STRIPだと冗長にならざるを得ない？
+    var ramiel_vertices = [
+        0.0, 0.0, 1.0, 
+        1.0, 0.0, 0.0, 
+        0.0, 1.0, 0.0, 
+        0.0, 0.0, -1.0, 
+        -1.0, 0.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, 0.0, 1.0, 
+        1.0, 0.0, 0.0,
+        0.0, -1.0, 0.0,
+        0.0, 0.0, -1.0,
+        -1.0, 0.0, 0.0,
+        0.0, 1.0, 0.0,
+        0.0, 0.0, 1.0
+    ];
+
+    var ground_vertices = [
+        -1.0, 0.0, -1.0,
+        -1.0, 0.0, 1.0,
+        1.0, 0.0, -1.0,
+        1.0, 0.0, 1.0
+    ];
+
+    var RamielBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, RamielBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ramiel_vertices), gl.STATIC_DRAW);
+
+    var GroundBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, GroundBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(ground_vertices), gl.STATIC_DRAW);
+
     // Get and set vertex attribute
     program.vertexPosAttrib = gl.getAttribLocation(program, 'pos');
     gl.enableVertexAttribArray(program.vertexPosAttrib);
-    gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0); // 第2引数がnumComponents 座標が何要素で記述されるか
+    var u_time_loc = gl.getUniformLocation(program, "u_time"); // for animation
+    var u_id_loc = gl.getUniformLocation(program, "u_id"); // ramiel=0  ground=1
+    
+    function init(ms_since_page_loaded) {
+        // Clear screen
+        gl.clearColor(0.9, 0.95, 1.0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.enable(gl.DEPTH_TEST);
 
-    // Draw triangles
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 8);
+        gl.uniform1f( u_time_loc, ms_since_page_loaded * 0.001 );
+
+        // Draw Ramiel
+        gl.uniform1i(u_id_loc, 0);
+        gl.bindBuffer(gl.ARRAY_BUFFER, RamielBuffer);
+        gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, ramiel_vertices.length / 3);
+
+        // Draw Ground
+        gl.uniform1i(u_id_loc, 1);
+        gl.bindBuffer(gl.ARRAY_BUFFER, GroundBuffer);
+        gl.vertexAttribPointer(program.vertexPosAttrib, 3, gl.FLOAT, false, 0, 0);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, ground_vertices.length / 3);
+        
+        requestAnimationFrame(init);
     }
-    window.onload = init;
+    window.onload = init(0);
  </script>
 </body>
 </html>
