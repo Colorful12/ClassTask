@@ -30,3 +30,11 @@ Create 'Neon Genesis Evangelion’s Ramiel'. The first time for creating 3DCD mo
     * Use a perspective camera
     * Make sure Ramiel is completely inside the rendered scene
 
+### shading.html
+Shade the simple scene with three types of illumination: ambient, directional, and point light.
+
+### PoisonDartFrog.html
+Create 2D poison dart frog without using textures.
+
+I will create this frog.
+![マダラヤドクガエル](image.png "Dendrobates auratus")
