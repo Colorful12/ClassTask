@@ -37,4 +37,5 @@ Shade the simple scene with three types of illumination: ambient, directional, a
 Create 2D poison dart frog without using textures.
 
 I will create this frog.
-![マダラヤドクガエル](image.png "Dendrobates auratus")
+![マダラヤドクガエル](![image](https://user-images.githubusercontent.com/63466820/204300597-07b3ebc2-8e30-421d-b0b4-3180049bfe76.png)
+ "Dendrobates auratus")
