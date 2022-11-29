@@ -1,0 +1,114 @@
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Individual Work</title>
+</head>
+<body>
+    <canvas id="glCanvas" style="width:400px; height:400px;">
+    <script id="vertex-shader" type="notjs">
+        #version 300 es
+        in vec4 pos;
+        
+        void main() {
+            gl_Position = pos;
+        }
+    </script>
+    <script id="fragment-shader" type="notjs">
+        #version 300 es
+        precision mediump float;
+
+        out vec4 color_out;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        void main() {
+            vec2 st = gl_FragCoord.xy/u_resolution.xy;
+            float mask = 1.0;
+            mask *= step( 0.3, distance( st.xy, vec2(0.5, 0.4) ) );
+            mask *= step( 0.25, distance( st.xy, vec2(0.6, 0.7) ) );
+            mask *= step( 0.25, distance( st.xy, vec2(0.4, 0.7) ) );
+            color_out = vec4( st.x, st.y, abs(sin(3.0*u_time)), 1.0 );
+            color_out *= 1.0-mask;
+        }
+    </script>
+    <script type="text/javascript">
+        function createProgram( gl, vertexSrc, fragmentSrc ) {
+        let vshd = gl.createShader( gl.VERTEX_SHADER );
+        gl.shaderSource( vshd, vertexSrc );
+        gl.compileShader( vshd );
+        if (!gl.getShaderParameter( vshd, gl.COMPILE_STATUS ))
+            throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( vshd ));
+        let fshd = gl.createShader( gl.FRAGMENT_SHADER );
+        gl.shaderSource( fshd, fragmentSrc );
+        gl.compileShader( fshd );
+        if (!gl.getShaderParameter( fshd, gl.COMPILE_STATUS ))
+            throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( fshd ));
+        let prog = gl.createProgram();
+        gl.attachShader( prog, vshd );
+        gl.attachShader( prog, fshd );
+        gl.linkProgram( prog );
+        if (!gl.getProgramParameter( prog, gl.LINK_STATUS ))
+            throw new Error( "Unable to link program: "+gl.getProgramInfoLog( prog ));
+        return prog;
+        }
+
+        function init() {
+        var c = document.getElementById("glCanvas");
+        var gl = c.getContext('webgl2');
+        if (!gl)
+            throw new Error("WebGL unsupported!");
+
+        // Clear screen
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        var vertexPosBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+        var vertices = [
+            -1, -1,
+            1, -1,
+            -1,  1,
+            1,  1 ];
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+        vertexPosBuffer.itemSize = 2;
+        vertexPosBuffer.numItems = 4;
+        
+        // Create our shader program
+        var vs = document.querySelector("#vertex-shader").text.trim();
+        var fs = document.querySelector("#fragment-shader").text.trim();
+        var program = createProgram(gl, vs, fs);
+        gl.useProgram(program);
+
+        program.vertexPosAttrib = gl.getAttribLocation(program, 'pos');
+        gl.enableVertexAttribArray(program.vertexPosAttrib);
+        gl.vertexAttribPointer(program.vertexPosAttrib, 2, gl.FLOAT, false, 0, 0);
+
+        // Remember to add and use u_time uniform in your shaders
+        var u_time_loc = gl.getUniformLocation(program, "u_time");
+        
+        var u_resolution_loc = gl.getUniformLocation(program, "u_resolution");
+        gl.uniform2f(u_resolution_loc, gl.canvas.width, gl.canvas.height);
+
+        function render( ms_since_page_loaded ) {
+            // Convert to seconds and send to shader
+            gl.uniform1f( u_time_loc, ms_since_page_loaded * 0.001 );
+
+            // Draw scene here using uniform float u_time to animate
+            // Below is an example using the relevant code from the WebGL skeleton
+            gl.useProgram( program );
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
+            gl.enableVertexAttribArray(program.vertexPosAttrib);
+            gl.vertexAttribPointer(program.vertexPosAttrib, vertexPosBuffer.itemSize, gl.FLOAT, false, 0, 0);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            // Request animation again
+            requestAnimationFrame( render );
+        }
+
+        // First render which will request animation
+        render( 0 );
+        }
+        window.onload = init;
+    </script>
+</body>
+</html>
