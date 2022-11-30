@@ -20,14 +20,28 @@
         out vec4 color_out;
         uniform vec2 u_resolution;
         uniform float u_time;
-
+        
+        float sdEgg(in vec2 p, in float ra, in float rb){
+            const float k = sqrt(3.0);
+            float r = ra - rb;
+            p.x = abs(p.x);
+            return ((p.y<0.0)       ? length(vec2(p.x,  p.y    )) - r :
+                    (k*(p.x+r)<p.y) ? length(vec2(p.x,  p.y-k*r)) :
+                                      length(vec2(p.x+r,p.y    )) - 2.0*r)-rb;
+        }
+        
         void main() {
             vec2 st = gl_FragCoord.xy/u_resolution.xy;
+            vec2 st2 = (2.0 * gl_FragCoord.xy - u_resolution.xy)/u_resolution.xy;
             float mask = 1.0;
-            mask *= step( 0.3, distance( st.xy, vec2(0.5, 0.4) ) );
-            mask *= step( 0.25, distance( st.xy, vec2(0.6, 0.7) ) );
-            mask *= step( 0.25, distance( st.xy, vec2(0.4, 0.7) ) );
-            color_out = vec4( st.x, st.y, abs(sin(3.0*u_time)), 1.0 );
+           
+            float r = 0.2;
+            st2.x = abs(st2.x);
+            
+            if (sdEgg(st-vec2(0.5,0.3), 0.2, 0.0) <= 0.0) mask *= 0.0;
+            if (sdEgg(st-vec2(0.500,0.520), 0.15, 0.11) <= 0.0) mask *= 0.0;
+            // mask *= step( 0.25, distance( st.xy, vec2(0.6, 0.7) ) );
+            color_out = vec4(0.52, 0.84, 0.80, 1.0 );
             color_out *= 1.0-mask;
         }
     </script>
