@@ -20,36 +20,46 @@
         out vec4 color_out;
         uniform vec2 u_resolution;
         uniform float u_time;
-        
+        float sdCircle( vec2 p, float r ){
+            return length(p) - r;
+        }
+        vec4 light(in vec2 p, float size){
+            float x = u_resolution.x * p.x;
+            float y = u_resolution.y * p.y;
+            vec2  pos = vec2(x, y);
+            float dist = length(gl_FragCoord.xy - pos);
+            float color = pow(size / dist, 2.0);
+            return vec4(vec3(color), 1.0);
+        }
         float sdEgg(in vec2 p, in float ra, in float rb, in float angle){
             mat3 c = mat3(cos(angle), -1.0*sin(angle), 0,
-                          sin(angle), cos(angle), 0,
-                          0, 0, 1.0);
+                        sin(angle), cos(angle), 0,
+                        0, 0, 1.0);
             vec3 new_p = c * vec3(p.xy, 1.0);
             const float k = sqrt(3.0);
             float r = ra - rb;
             new_p.x = abs(new_p.x);
             return ((new_p.y<0.0)       ? length(vec2(new_p.x,  new_p.y    )) - r :
                     (k*(new_p.x+r)<new_p.y) ? length(vec2(new_p.x,  new_p.y-k*r)) :
-                                      length(vec2(new_p.x+r,new_p.y    )) - 2.0*r)-rb;
+                                    length(vec2(new_p.x+r,new_p.y    )) - 2.0*r)-rb;
         }
         float sdArc( in vec2 p, in vec2 sc, in float ra, float rb , in float angle){
             mat3 c = mat3(cos(angle), -1.0*sin(angle), 0,
-                          sin(angle), cos(angle), 0,
-                          0, 0, 1.0);
+                        sin(angle), cos(angle), 0,
+                        0, 0, 1.0);
             vec3 new_p = c * vec3(p.xy, 1.0);
             new_p.x = abs(new_p.x);
             return ((sc.y*new_p.x>sc.x*new_p.y) ? length(new_p.xy-sc*ra) : 
-                                          abs(length(new_p.xy)-ra)) - rb;
+                                        abs(length(new_p.xy)-ra)) - rb;
         }
-      
+  
         vec2 sincos(in float angle){
             return vec2(sin(angle),cos(angle));
         }
         vec3 mod289(vec3 x) {
             return x - floor(x * (1.0 / 289.0)) * 289.0;
         }
-        
+    
         vec2 mod289(vec2 x) {
             return x - floor(x * (1.0 / 289.0)) * 289.0;
         }
@@ -93,8 +103,8 @@
         float fbm(vec2 p){
             float f = 0.0, scale;
             for (int i=0; i<4; i++){
-               scale = pow(pow(2.0, 4.0/3.0), float(i));
-               f += snoise(p*scale) / scale;
+            scale = pow(pow(2.0, 4.0/3.0), float(i));
+            f += snoise(p*scale) / scale;
             }
             return f;
         }
@@ -103,29 +113,30 @@
             float noise = fbm(st/0.03);
             int color=0;
             float r = 0.2;
+            vec2 h_light;
             
             if (sdArc(st-vec2(0.500,0.620), sincos(0.3), 0.2, 0.015, 2.164)<=0.0) color = 1; //l-f fing
             if (sdArc(st-vec2(0.450,0.620), sincos(0.3), 0.2, 0.015, 2.364)<=0.0) {
-               color = 1; //l-f fing
-               if (sdEgg(st-vec2(0.240,0.520), 0.08, 0.1, -1.348) <= 0.0) color = 2;
+            color = 1; //l-f fing
+            if (sdEgg(st-vec2(0.240,0.520), 0.08, 0.1, -1.348) <= 0.0) color = 2;
             }
             if (sdArc(st-vec2(0.380,0.420), sincos(0.3), 0.2, 0.015, 2.364)<=0.0) {
-               color = 1; //l-b fing
-               if (sdEgg(st-vec2(0.170,0.350), 0.08, 0.1, -0.900) <= 0.0) color = 2;
+            color = 1; //l-b fing
+            if (sdEgg(st-vec2(0.170,0.350), 0.08, 0.1, -0.900) <= 0.0) color = 2;
             }
             if (sdArc(st-vec2(0.460,0.400), sincos(0.3), 0.2, 0.015, 1.948)<=0.0) color = 1; //l-b fing
             if (sdArc(st-vec2(0.500,0.620), sincos(0.3), 0.2, 0.015, -2.164)<=0.0) {
-               color = 1;
-               if (sdEgg(st-vec2(0.760,0.560), 0.08, 0.1, -1.348) <= 0.0) color = 2;
+            color = 1;
+            if (sdEgg(st-vec2(0.760,0.560), 0.08, 0.1, -1.348) <= 0.0) color = 2;
             }
             if (sdArc(st-vec2(0.55,0.620), sincos(0.3), 0.2, 0.015, -2.364)<=0.0) {
-               color = 1;
-               if (sdEgg(st-vec2(0.760,0.560), 0.08, 0.1, -1.348) <= 0.0) color = 2;
+            color = 1;
+            if (sdEgg(st-vec2(0.760,0.560), 0.08, 0.1, -1.348) <= 0.0) color = 2;
             }
             if (sdArc(st-vec2(0.62,0.420), sincos(0.3), 0.2, 0.015, -2.364)<=0.0) color = 1; 
             if (sdArc(st-vec2(0.54,0.400), sincos(0.3), 0.2, 0.015, -1.948)<=0.0) {
-               color = 1;
-               if (sdEgg(st-vec2(0.760,0.440), 0.08, 0.1, -0.900) <= 0.0) color = 2;
+            color = 1;
+            if (sdEgg(st-vec2(0.760,0.440), 0.08, 0.1, -0.900) <= 0.0) color = 2;
             }
             if (sdEgg(st-vec2(0.350,0.230), 0.10, 0.05, 0.65) <= 0.0){
                 color = 1;
@@ -158,6 +169,17 @@
             if (color==1) color_out = vec4(121.0/255.0,219.0/255.0, 209.0/255.0, noise/4.0 +1.0 ) ;
             else if (color==2) color_out = vec4(0.0, 0.0, 0.0, 1.0 );
             else color_out = vec4(1.0,1.0,1.0,1.0);
+        
+            if (sdEgg(st-vec2(0.400,0.650), 0.04, 0.08, -2.290) <= 0.0) {
+                color = 2; //eye
+                h_light = vec2(0.400,0.670);
+                if (sdCircle(st-h_light, 0.02) <= 0.0) color_out = light(h_light, 2.0);
+            }
+            if (sdEgg(st-vec2(0.600,0.650), 0.04, 0.08, 2.290) <= 0.0) {
+                color = 2; //eye
+                h_light = vec2(0.600,0.670);
+                if (sdCircle(st-h_light, 0.02) <= 0.0) color_out = light(h_light, 2.0);
+            }
         }
     </script>
     <script type="text/javascript">
