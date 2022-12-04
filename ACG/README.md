@@ -39,3 +39,6 @@ Create 2D poison dart frog without using textures.
 I will create this frog.
 
 ![image](https://user-images.githubusercontent.com/63466820/204300860-58bfc036-94d7-4a80-91d9-935ca17e4d4a.png "Dendrobates auratus")
+
+![image](https://user-images.githubusercontent.com/63466820/205481628-505759ee-7afb-4a11-bce5-dc3a688145ee.png)
+
