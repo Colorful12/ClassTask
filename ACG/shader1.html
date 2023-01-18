@@ -28,23 +28,25 @@
  </script>
  <script type="text/javascript">
     function createProgram( gl, vertexSrc, fragmentSrc ) {
-    let vshd = gl.createShader( gl.VERTEX_SHADER );
-    gl.shaderSource( vshd, vertexSrc );
-    gl.compileShader( vshd );
-    if (!gl.getShaderParameter( vshd, gl.COMPILE_STATUS ))
-        throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( vshd ));
-    let fshd = gl.createShader( gl.FRAGMENT_SHADER );
-    gl.shaderSource( fshd, fragmentSrc );
-    gl.compileShader( fshd );
-    if (!gl.getShaderParameter( fshd, gl.COMPILE_STATUS ))
-        throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( fshd ));
-    let prog = gl.createProgram();
-    gl.attachShader( prog, vshd );
-    gl.attachShader( prog, fshd );
-    gl.linkProgram( prog );
-    if (!gl.getProgramParameter( prog, gl.LINK_STATUS ))
-        throw new Error( "Unable to link program: "+gl.getProgramInfoLog( prog ));
-    return prog;
+        let vshd = gl.createShader( gl.VERTEX_SHADER );
+        gl.shaderSource( vshd, vertexSrc );
+        gl.compileShader( vshd );
+        if (!gl.getShaderParameter( vshd, gl.COMPILE_STATUS ))
+            throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( vshd ));
+        
+        let fshd = gl.createShader( gl.FRAGMENT_SHADER );
+        gl.shaderSource( fshd, fragmentSrc );
+        gl.compileShader( fshd );
+        if (!gl.getShaderParameter( fshd, gl.COMPILE_STATUS ))
+            throw new Error( "Unable to compile shader: "+gl.getShaderInfoLog( fshd ));
+        
+            let prog = gl.createProgram();
+        gl.attachShader( prog, vshd );
+        gl.attachShader( prog, fshd );
+        gl.linkProgram( prog );
+        if (!gl.getProgramParameter( prog, gl.LINK_STATUS ))
+            throw new Error( "Unable to link program: "+gl.getProgramInfoLog( prog ));
+        return prog;
     }
 
     function init() {
@@ -71,11 +73,13 @@
         1, -1,
         -1,  1,
         1,  1 ];
+    // STATIC_DRAW : 値はほとんど変更されない, STREAM_DRAW : 値は1度もしくは数回しか使われない, DYNAMIC_DRAW: 値はたくさん修正・使用される
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
     vertexPosBuffer.itemSize = 2;
     vertexPosBuffer.numItems = 4;
 
     // Create our shader program
+    // vsとfsには, シェーダーのプログラム(l9～l28)が格納される
     var vs = document.querySelector("#vertex-shader").text.trim();
     var fs = document.querySelector("#fragment-shader").text.trim();
     var program = createProgram(gl, vs, fs);
